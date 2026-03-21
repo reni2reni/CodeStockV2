@@ -1,9 +1,7 @@
-This code is for a Chrome extension.
-To use it, you must install the Chrome extension.
-Enable Developer Mode, add this folder, pin it to the top-right corner of your browser,
-and then click “Open Subpanel” in the middle of the menu that appears when you click to display and use it.
-
-Please refer to the included PNG images for details on each feature.
+This code is for a Chrome extension. To use it, you must install the extension. 
+Enable Developer Mode, add this folder
+pin it to the top-right corner of your browser 
+and then click “Open Subpanel” in the middle of the menu that appears when you click the extension to display and use it.
 
 Please refer to the included PNG images for details on each feature.
 
