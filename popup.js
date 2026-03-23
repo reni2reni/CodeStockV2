@@ -51,41 +51,26 @@ function saveTabCount() {
     //saveConfig();
 }
 
-
 function delayedSet(data, callback) {
-
     const lamp =
         document.getElementById("storageLamp");
-
     if (lamp)
         lamp.style.background = "#ffcc00";
-
     if (saveTimer)
         clearTimeout(saveTimer);
-
     saveTimer = setTimeout(() => {
-
         chrome.storage.local.set(data, () => {
-
             if (lamp) {
-
                 lamp.style.background = "#ff2222";
-
                 setTimeout(() => {
                     lamp.style.background = "#333";
                 }, 200);
-
             }
-
             if (callback)
                 callback();
-
         });
-
         saveTimer = null;
-
     }, SAVE_DELAY);
-
 }
 
 function renderTabs() {
@@ -236,130 +221,64 @@ function renderColorTabs() {
 }
 // --- renderFilterColorTabs ---
 function renderFilterColorTabs() {
-
     const box = document.getElementById("filterColorTabs");
-
     if (!box) return;
-
     box.innerHTML = "";
-
     box.style.display = "flex";
-
     box.style.gap = "4px";
-
-
     let all = document.createElement("div");
-
     all.className = "tab";
-
     all.textContent = "ALL";
-
     all.style.padding = "0 6px";
-
     all.style.fontSize = "11px";
-
     all.style.cursor = "pointer";
-
-
     if (filterColor === null)
         all.classList.add("active");
-
-
     all.onclick = () => {
-
         filterColor = null;
-
         renderFilterColorTabs();
-
         renderList();
-
     };
-
-
     box.appendChild(all);
-
-
     for (let i = 0; i < 8; i++) {
-
         let b = document.createElement("div");
-
         b.className = "tab";
-
         b.style.background = palette[i];
-
         b.style.width = "24px";
-
         b.style.height = "16px";
-
-
         if (filterColor === i)
             b.classList.add("active");
-
-
         b.onclick = () => {
-
             if (filterColor === i)
                 filterColor = null;
             else
                 filterColor = i;
-
             renderFilterColorTabs();
-
             renderList();
-
         };
-
-
         b.oncontextmenu = (e) => {
-
             e.preventDefault();
-
             const sysPicker = document.createElement("input");
-
             sysPicker.type = "color";
-
             sysPicker.value = palette[i];
-
             sysPicker.style.display = "none";
-
             document.body.appendChild(sysPicker);
-
-
             sysPicker.oninput = () => {
-
                 palette[i] = sysPicker.value;
-
                 b.style.background = palette[i];
-
                 renderList();
-
             };
-
-
             sysPicker.onchange = () => {
-
                 palette[i] = sysPicker.value;
-
                 renderFilterColorTabs();
-
                 renderColorTabs();
-
                 savePalette();
-
                 document.body.removeChild(sysPicker);
-
             };
-
-
             sysPicker.click();
-
         };
-
-
         box.appendChild(b);
-
     }
-
 }
 
 function addItem() {
@@ -425,45 +344,29 @@ function renderList() {
         let id = String(item.id);
         let div = document.createElement("div");
         div.oncontextmenu = (e) => {
-
             // dragボタン以外は右クリック禁止
             if (e.target !== drag) {
-
                 e.preventDefault();
-
                 return false;
 
             }
-
         };
         div.className = "item";
         div.dataset.id = id;
         if (cutIds.has(id)) {
-
             div.style.opacity = "0.4";
-
             div.style.border = "1px dashed #888";
-
         }
         let drag = document.createElement("button");
         drag.oncontextmenu = (e) => {
-
             e.preventDefault();
-
             if (!selectedIds.has(id)) {
-
                 selectedIds.clear();
-
                 selectedIds.add(id);
-
                 lastSelected = id;
-
                 renderList();
-
             }
-
             showMenu(e, item);
-
         };
         drag.textContent = "≡";
         drag.style.width = "26px";
@@ -682,20 +585,13 @@ function renderList() {
         list.appendChild(div);
     }
     let endDrop = document.createElement("div");
-
     endDrop.style.height = "14px";
-
-    endDrop.style.marginTop = "2px";
-    
+    endDrop.style.marginTop = "2px";  
     // ★ここに追加
     endDrop.oncontextmenu = (e) => {
-
         e.preventDefault();
-
         showMenu(e, null);
-
     };
-
     endDrop.ondragover = (e) => {
         e.preventDefault();
         endDrop.style.borderTop = "2px solid #4a7bd4";
@@ -855,7 +751,6 @@ function showConfirm(x, y, text, yes) {
             b.style.background = "#2d2d2d";
         };
     });
-
     ok.onclick = () => {
         yes();
         box.remove();
@@ -872,14 +767,10 @@ function showConfirm(x, y, text, yes) {
 function saveItems() {
     delayedSet({ items }, () => {
         updateStorageInfo();
-
         const lamp =
             document.getElementById("storageLamp");
-
         if (!lamp) return;
-
         lamp.style.background = "#ff2222";
-
         setTimeout(() => {
             lamp.style.background = "#333";
         }, 200);
@@ -954,31 +845,22 @@ function showMenu(e, item) {
         menu.appendChild(b);
     }
     add("Copy", () => {
-
         internalClipboard = items
             .filter(i => selectedIds.has(String(i.id)))
             .map(i => ({ ...i }));
-
         clipboardMode = "copy";
-
         cutIds.clear(); // ★追加
-
     });
     add("Cut", () => {
-
         internalClipboard = items
             .filter(i => selectedIds.has(String(i.id)));
-
         clipboardMode = "cut";
-
         // ★追加（暗転用）
         cutIds = new Set(
             internalClipboard.map(i => String(i.id))
         );
-
     });
     add("Paste", () => {
-
         pasteItems(item);
     });
     document.body.appendChild(menu);
@@ -996,25 +878,19 @@ function pasteItems(target) {
         i.child === filterChild[filterParent]
     );
     group.sort((a, b) => a.order - b.order);
-
     // ★ここ修正開始
     let index;
-
     if (target) {
-
         index = group.findIndex(i =>
             String(i.id) === String(target.id)
         );
-
         if (index === -1)
             index = group.length;
-
     }
     else {
 
         // 空リストまたは末尾
         index = group.length;
-
     }
     if (index === -1)
         index = group.length;
@@ -1032,18 +908,12 @@ function pasteItems(target) {
         items.push(...insert);
     }
     else {
-
         insert = internalClipboard;
-
         // ★追加（これだけ）
         insert.forEach(i => {
-
             i.parent = filterParent;
-
             i.child = filterChild[filterParent];
-
         });
-
     }
     // 一旦groupから移動対象除外
     let remain = group.filter(i =>
@@ -1059,15 +929,10 @@ function pasteItems(target) {
     }
     // CUTなら削除済みgroup外はそのまま
     if (clipboardMode === "cut") {
-
         internalClipboard = [];
-
         selectedIds.clear();
-
         cutIds.clear(); // ★追加
-
         clipboardMode = null;
-
     }
     renderList();
     save();
@@ -1079,9 +944,7 @@ function load() {
         (res) => {
             if (res.items) items = res.items;
             if (res.parents) parents = res.parents;
-            if (res.children) children = res.children;
-            
-            
+            if (res.children) children = res.children;                        
             if (res.palette) palette = res.palette;
             // ← ここ重要: currentParent / currentChild を storage に合わせる
             currentParent = filterParent;
@@ -1321,18 +1184,13 @@ document.getElementById("openWindow").addEventListener("click", () => {
 
     // 現在タブ取得してsidepanel閉じる
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-
         if (tabs.length > 0) {
-
             chrome.sidePanel.setOptions({
                 tabId: tabs[0].id,
                 enabled: false
             });
-
         }
-
     });
-
     window.close();
 });
 // --- ボタンイベント ---
