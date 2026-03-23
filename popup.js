@@ -1,9 +1,9 @@
 let items = [];
 let parentMAX = 4;
 let childMAX = 4;
-let parents = ["F-A", "---", "---", "---", "---", "---", "---", "---"];
+let parents = ["A", "---", "---", "---", "---", "---", "---", "---"];
 let children = [
-    ["S-0", "S-1", "S-2", "S-3", "---", "---", "---", "---"],
+    ["A-0", "A-1", "A-2", "A-3", "A-4", "A-5", "A-6", "A-7"],
     ["---", "---", "---", "---", "---", "---", "---", "---"],
     ["---", "---", "---", "---", "---", "---", "---", "---"],
     ["---", "---", "---", "---", "---", "---", "---", "---"],
@@ -13,7 +13,7 @@ let children = [
     ["---", "---", "---", "---", "---", "---", "---", "---"]
 ];
 let currentColor = 0;
-let filterColors = new Set([0, 1, 2, 3, 4, 5, 6, 7]);
+let filterColor = null;
 let palette = [
     "#e74c3c",//0
     "#f39c12",//1
@@ -145,7 +145,7 @@ function renderFilter() {
             showPrompt(
                 e.clientX,
                 e.clientY,
-                "Parent folder name",
+                "Foldername",
                 parents[i],
                 (name) => {
                     if (name && name.trim()) {
@@ -179,7 +179,7 @@ function renderFilter() {
             showPrompt(
                 e.clientX,
                 e.clientY,
-                "Subfolder name",
+                "SubFoldername",
                 children[filterParent][i],
                 (name) => {
                     if (name && name.trim()) {
@@ -236,66 +236,130 @@ function renderColorTabs() {
 }
 // --- renderFilterColorTabs ---
 function renderFilterColorTabs() {
+
     const box = document.getElementById("filterColorTabs");
+
     if (!box) return;
+
     box.innerHTML = "";
+
     box.style.display = "flex";
+
     box.style.gap = "4px";
+
+
     let all = document.createElement("div");
+
     all.className = "tab";
+
     all.textContent = "ALL";
+
     all.style.padding = "0 6px";
+
     all.style.fontSize = "11px";
+
     all.style.cursor = "pointer";
-    if (filterColors.size === 8) all.classList.add("active");
+
+
+    if (filterColor === null)
+        all.classList.add("active");
+
+
     all.onclick = () => {
-        if (filterColors.size === 8)
-            filterColors = new Set();
-        else
-            filterColors = new Set([0, 1, 2, 3, 4, 5, 6, 7]);
+
+        filterColor = null;
+
         renderFilterColorTabs();
+
         renderList();
-        
+
     };
+
+
     box.appendChild(all);
+
+
     for (let i = 0; i < 8; i++) {
+
         let b = document.createElement("div");
+
         b.className = "tab";
+
         b.style.background = palette[i];
+
         b.style.width = "24px";
+
         b.style.height = "16px";
-        if (filterColors.has(i)) b.classList.add("active");
+
+
+        if (filterColor === i)
+            b.classList.add("active");
+
+
         b.onclick = () => {
-            if (filterColors.has(i)) filterColors.delete(i);
-            else filterColors.add(i);
+
+            if (filterColor === i)
+                filterColor = null;
+            else
+                filterColor = i;
+
             renderFilterColorTabs();
+
             renderList();
-            
+
         };
-        // 右クリックでPicker表示
+
+
         b.oncontextmenu = (e) => {
+
             e.preventDefault();
+
             const sysPicker = document.createElement("input");
+
             sysPicker.type = "color";
+
             sysPicker.value = palette[i];
+
             sysPicker.style.display = "none";
+
             document.body.appendChild(sysPicker);
+
+
             sysPicker.oninput = () => {
+
                 palette[i] = sysPicker.value;
+
                 b.style.background = palette[i];
+
                 renderList();
+
             };
+
+
             sysPicker.onchange = () => {
+
                 palette[i] = sysPicker.value;
+
                 renderFilterColorTabs();
+
                 renderColorTabs();
-                savePalette(); // ここで必ず保存
+
+                savePalette();
+
                 document.body.removeChild(sysPicker);
+
             };
+
+
             sysPicker.click();
+
         };
+
+
         box.appendChild(b);
+
     }
+
 }
 
 function addItem() {
@@ -351,7 +415,7 @@ function renderList() {
         // 子タブフィルター
         if (item.child !== filterChild[filterParent]) return false;
         // カラーが空の場合は全て通す、それ以外はフィルター
-        if (filterColors.size > 0 && !filterColors.has(item.color || 0)) return false;
+        if (filterColor !== null && (item.color || 0) !== filterColor) return false;
         // 検索文字列
         if (!item.title.toLowerCase().includes(search)) return false;
         return true;
@@ -360,6 +424,18 @@ function renderList() {
     for (let item of filtered) {
         let id = String(item.id);
         let div = document.createElement("div");
+        div.oncontextmenu = (e) => {
+
+            // dragボタン以外は右クリック禁止
+            if (e.target !== drag) {
+
+                e.preventDefault();
+
+                return false;
+
+            }
+
+        };
         div.className = "item";
         div.dataset.id = id;
         if (cutIds.has(id)) {
@@ -370,6 +446,25 @@ function renderList() {
 
         }
         let drag = document.createElement("button");
+        drag.oncontextmenu = (e) => {
+
+            e.preventDefault();
+
+            if (!selectedIds.has(id)) {
+
+                selectedIds.clear();
+
+                selectedIds.add(id);
+
+                lastSelected = id;
+
+                renderList();
+
+            }
+
+            showMenu(e, item);
+
+        };
         drag.textContent = "≡";
         drag.style.width = "26px";
         drag.style.height = "22px";
@@ -444,17 +539,11 @@ function renderList() {
                 }, 500);
             }, 500);
         };
-        div.oncontextmenu = (e) => {
-            e.preventDefault();
-            if (!selectedIds.has(id)) {
-                selectedIds.clear();
-                selectedIds.add(id);
-                lastSelected = id;
-                renderList();
-            }
-            showMenu(e, item);
-        };
+        
         drag.onclick = (e) => {
+            const menu = document.getElementById("popupMenu");
+            if (menu)
+                menu.remove();
             e.stopPropagation();
             let group = filtered.map(i => String(i.id));
             if (e.shiftKey && lastSelected) {
@@ -509,7 +598,7 @@ function renderList() {
             showConfirm(
                 e.clientX,
                 e.clientY,
-                "Do you want to delete it?",
+                "delete it?",
                 () => {
                     items = items.filter(i =>
                         !selectedIds.has(String(i.id))
@@ -994,7 +1083,6 @@ function load() {
             
             
             if (res.palette) palette = res.palette;
-            if (res.filterColors) filterColors = new Set(res.filterColors);
             // ← ここ重要: currentParent / currentChild を storage に合わせる
             currentParent = filterParent;
             for (let i = 0; i < children.length; i++) {
@@ -1282,7 +1370,7 @@ document.getElementById("importBtn").addEventListener("click", () => {
     document.getElementById("importFile").click();
 });
 document.getElementById("importFile").addEventListener("change", (e) => {
-    if (!confirm("The data will be overwritten. Do you want to continue?")) return;
+    if (!confirm("overwrite the current data. Do you want to continue?")) return;
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -1322,9 +1410,9 @@ document.getElementById("importFile").addEventListener("change", (e) => {
                 children,
                 palette
             });
-            alert("IMPORT OK");
+            alert("Import complete.");
         } catch {
-            alert("Loading failed");
+            alert("Loading failed.");
         }
     };
     reader.readAsText(file);
