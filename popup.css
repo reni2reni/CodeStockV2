@@ -428,3 +428,27 @@ body {
   flex-direction: column;
   height: 95vh;
 }
+
+#parentTabs .tab,
+#filterParent .tab,
+#childTabs .tab,
+#filterChild .tab {
+    /* 幅を制限する */
+    max-width: 180px;
+    /* 任意の幅 */
+    height:28px;
+    width: 100%;
+    /* 必須のプロパティ */
+    display: inline-block;
+    /* ボタンをブロックレベルのように扱う */
+    white-space: nowrap;
+    /* 改行させない */
+    overflow: hidden;
+    /* 溢れた分を隠す */
+    text-overflow: ellipsis;
+    /* 省略記号(...)を表示する場合（不要なら削除） */
+    text-align: center;
+    /* 見た目の調整 */
+    box-sizing: border-box;
+    /* paddingを含めた幅計算 */
+    }
