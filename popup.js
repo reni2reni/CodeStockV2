@@ -39,6 +39,7 @@ let internalClipboard = [];
 let clipboardMode = null;
 let cutIds = new Set();
 
+
 const SAVE_DELAY = 100;
 chrome.storage.local.get("SAVE_DELAY", (res) => {
     if (res.SAVE_DELAY !== undefined) {
@@ -49,6 +50,14 @@ chrome.storage.local.get("SAVE_DELAY", (res) => {
 const originalSet = delayedSet;
 function saveTabCount() {
     //saveConfig();
+}
+
+// タブ名を5文字に制限
+function shortTab(name, max = 5) {
+    if (!name) return "";
+    return name.length > max
+        ? name.slice(0, max) + "…"
+        : name;
 }
 
 function delayedSet(data, callback) {
@@ -81,6 +90,7 @@ function renderTabs() {
         let tab = document.createElement("div");
         tab.className = "tab";
         tab.textContent = parents[i]; // フィルターで変更された名前を反映
+        tab.title = parents[i];
         if (i === currentParent) tab.classList.add("active");
         tab.onclick = () => {
             currentParent = i;
@@ -96,6 +106,7 @@ function renderTabs() {
         tab.className = "tab";
         // 入力側タブは常にフィルター側の名前と同期
         tab.textContent = children[currentParent][i] || `Child-${i}`;
+        tab.title = children[currentParent][i];
         if (i === currentChild[currentParent]) tab.classList.add("active");
         tab.onclick = () => {
             currentChild[currentParent] = i;
@@ -115,6 +126,7 @@ function renderFilter() {
         let tab = document.createElement("div");
         tab.className = "tab";
         tab.textContent = parents[i];
+        tab.title = parents[i];
         if (i === filterParent) tab.classList.add("active");
         tab.onclick = () => {
             filterParent = i;
@@ -150,6 +162,7 @@ function renderFilter() {
         let tab = document.createElement("div");
         tab.className = "tab";
         tab.textContent = children[filterParent][i];
+        tab.title = children[currentParent][i];
         if (i === filterChild[filterParent]) tab.classList.add("active");
         tab.onclick = () => {
             filterChild[filterParent] = i;
